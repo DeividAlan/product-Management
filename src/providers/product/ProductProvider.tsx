@@ -1,6 +1,9 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
+import { useSnackbar } from 'notistack';
 import { createContext, useEffect, useMemo, useState } from 'react';
-import { Outlet, useParams } from 'react-router';
+import { useSelector } from 'react-redux';
+import { Outlet, useNavigate, useParams } from 'react-router';
+import { selectAuth } from 'src/store/authSlice';
 
 export type ProductType = {
   id: string;
@@ -23,37 +26,32 @@ const ProductContext = createContext<ProductContextType>(
   {} as ProductContextType
 );
 
-const fetchProduct = async (id: string): Promise<ProductType> => {
-  const productEmpty = {
-    id: '',
-    nome: '',
-    preco: '',
-    image: '',
-    qt_estoque: 0,
-    qt_vendas: 0,
-    marca: '',
-    createdAt: '',
-  };
+const fetchProduct = async (
+  id: string,
+  token: string
+): Promise<ProductType> => {
+  const response = await axios.get(
+    `${import.meta.env.VITE_API_BASE_URL}/product/${id}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
 
-  //	https://loremflickr.com/400/300?lock=362523
-
-  try {
-    const response = await axios.get(
-      `https://67ddc6fd471aaaa7428282c2.mockapi.io/api/v1/product/${id}`
-    );
-    return response.data || productEmpty;
-  } catch (error) {
-    console.error(error);
-    return productEmpty;
+  if (!response.data.id) {
+    throw new Error('Produto não encontrado');
   }
+
+  return response.data;
 };
 
-interface ProductContextProviderProps {
-  errorMessage?: string;
-}
-
-function ProductContextProvider({ errorMessage }: ProductContextProviderProps) {
+function ProductContextProvider() {
   const { id } = useParams<{ id: string }>();
+  const { enqueueSnackbar } = useSnackbar();
+  const { token } = useSelector(selectAuth);
+  const navigate = useNavigate();
+
   const [productData, setProductData] = useState<ProductType>({
     id: '',
     nome: '',
@@ -62,27 +60,39 @@ function ProductContextProvider({ errorMessage }: ProductContextProviderProps) {
     qt_estoque: 0,
     qt_vendas: 0,
     marca: '',
-
     createdAt: '',
   });
 
   useEffect(() => {
     if (id) {
-      fetchProduct(id).then((data) => {
-        setProductData(data);
-      });
-    }
+      fetchProduct(id, token!)
+        .then((data) => {
+          setProductData(data);
+        })
+        .catch((error) => {
+          if (axios.isAxiosError(error)) {
+            const axiosError = error as AxiosError;
 
-    console.log('foiiiiiiiii');
+            if (axiosError.response && axiosError.response.status === 404) {
+              navigate('/404');
+              return;
+            }
+          }
+
+          enqueueSnackbar(
+            'Erro ao carregar o produto. Tente novamente mais tarde!'
+          );
+          navigate(-1);
+        });
+    }
   }, [id]);
 
   const contextValue = useMemo(
     () => ({
       productData,
-      errorMessage,
       setProductData,
     }),
-    [productData, errorMessage, setProductData]
+    [productData, setProductData]
   );
 
   return (

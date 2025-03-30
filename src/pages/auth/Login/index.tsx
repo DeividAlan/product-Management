@@ -68,43 +68,6 @@ export default function Login(props: { disableCustomTheme?: boolean }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setLoginError('');
-
-    const formData = new FormData(event.currentTarget);
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
-
-    try {
-      const { data: users } = await axios.get(
-        `https://67ddc6fd471aaaa7428282c2.mockapi.io/api/v1/user?search=${email}`
-      );
-
-      if (users.length === 0) {
-        setLoginError('Credenciais inválidas.');
-        return;
-      }
-
-      const user = users[0];
-
-      if (user.senha !== password) {
-        setLoginError('Credenciais inválidas.');
-        return;
-      }
-      dispatch(
-        login({
-          user: { name: user.nome, email: user.email, image: user.image },
-          token: user.token,
-        })
-      );
-      navigate('/products');
-    } catch (err) {
-      setLoginError('Erro ao fazer login. Tente novamente.');
-      console.error('Erro:', err);
-    }
-  };
-
   const validateInputs = () => {
     const email = document.getElementById('email') as HTMLInputElement;
     const password = document.getElementById('password') as HTMLInputElement;
@@ -130,6 +93,47 @@ export default function Login(props: { disableCustomTheme?: boolean }) {
     }
 
     return isValid;
+  };
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setLoginError('');
+
+    if (!validateInputs()) {
+      return;
+    }
+
+    const formData = new FormData(event.currentTarget);
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+
+    try {
+      const { data: users } = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/user?search=${email}`
+      );
+
+      if (users.length === 0) {
+        setLoginError('Credenciais inválidas.');
+        return;
+      }
+
+      const user = users[0];
+
+      if (user.senha !== password) {
+        setLoginError('Credenciais inválidas.');
+        return;
+      }
+      dispatch(
+        login({
+          user: { name: user.nome, email: user.email, image: user.image },
+          token: user.token,
+        })
+      );
+      navigate('/products');
+    } catch (err) {
+      setLoginError('Erro ao fazer login. Tente novamente.');
+      console.error('Erro:', err);
+    }
   };
 
   return (
@@ -194,13 +198,7 @@ export default function Login(props: { disableCustomTheme?: boolean }) {
                 {loginError}
               </Typography>
             )}
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              onClick={validateInputs}
-              sx={{ mt: 2 }}
-            >
+            <Button type="submit" fullWidth variant="contained" sx={{ mt: 2 }}>
               Entrar
             </Button>
           </Box>

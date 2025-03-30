@@ -47,7 +47,7 @@ export default function ProductsList() {
 
   useEffect(() => {
     axios
-      .get('https://67ddc6fd471aaaa7428282c2.mockapi.io/api/v1/product', {
+      .get(`${import.meta.env.VITE_API_BASE_URL}/product`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

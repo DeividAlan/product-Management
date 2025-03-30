@@ -7,6 +7,7 @@ import useProductContext from 'src/providers/product/useProductContext';
 import { useSelector } from 'react-redux';
 import { selectAuth } from 'src/store/authSlice';
 import { CustomModal } from 'src/components/Modal';
+import { formatCurrencyBRL } from 'src/help/currencyHelp';
 
 export default function ProductView() {
   const { productData } = useProductContext();
@@ -29,7 +30,7 @@ export default function ProductView() {
 
     try {
       await axios.delete(
-        `https://67ddc6fd471aaaa7428282c2.mockapi.io/api/v1/product/${productData.id}`,
+        `${import.meta.env.VITE_API_BASE_URL}/product/${productData.id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -77,11 +78,20 @@ export default function ProductView() {
             display: 'flex',
             flexDirection: { xs: 'column', sm: 'row' },
             alignItems: 'center',
+            gap: 2,
             marginBottom: 4,
           }}
         >
           <Typography variant="h4">{productData.nome}</Typography>
-          <Box sx={{ ml: 'auto', display: 'flex', gap: 2 }}>
+          <Box
+            sx={{
+              ml: { xs: 0, sm: 'auto' },
+              display: 'flex',
+              justifyContent: 'space-around',
+              gap: 2,
+              width: { xs: '100%', sm: 'auto' },
+            }}
+          >
             <Button
               variant="outlined"
               color="primary"
@@ -125,7 +135,7 @@ export default function ProductView() {
                     Preço
                   </Typography>
                   <Typography variant="h4" component="h2" gutterBottom>
-                    {productData.preco}
+                    {formatCurrencyBRL(productData.preco)}
                   </Typography>
                 </Grid>
                 <Grid size={{ xs: 12, sm: 6 }}>

@@ -6,7 +6,7 @@ import AppTheme from '../AppTheme';
 import { Outlet, useNavigate } from 'react-router';
 import { Navigation } from '@toolpad/core';
 import { Account } from '@toolpad/core/Account';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout, selectAuth } from 'src/store/authSlice';
 import { Box, Typography } from '@mui/material';
@@ -38,8 +38,13 @@ export default function MainLayout() {
     };
   }, [dispatch]);
 
+  useEffect(() => {
+    if (user === null) {
+      navigate('/');
+    }
+  }, [user, navigate]);
+
   if (user === null) {
-    navigate('/');
     return null;
   }
 

@@ -68,7 +68,7 @@ export default function RegisterForm() {
     setLoading(true);
     try {
       const response = await axios.post(
-        'https://67ddc6fd471aaaa7428282c2.mockapi.io/api/v1/user',
+        `${import.meta.env.VITE_API_BASE_URL}/user`,
         {
           nome: data.firstName,
           sobrenome: data.lastName,
@@ -90,8 +90,6 @@ export default function RegisterForm() {
           },
         }
       );
-
-      console.log(response);
 
       if (!response.data.id) {
         throw new Error('Erro ao salvar usuário');

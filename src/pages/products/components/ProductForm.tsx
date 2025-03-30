@@ -108,7 +108,7 @@ export default function ProductForm({
 
     try {
       const response = await axios.put(
-        `https://67ddc6fd471aaaa7428282c2.mockapi.io/api/v1/product/${productData?.id}`,
+        `${import.meta.env.VITE_API_BASE_URL}/product/${productData?.id}`,
         {
           nome: data.nome,
           preco: parseCurrencyBRL(data.preco).toString(),
@@ -152,25 +152,8 @@ export default function ProductForm({
     const data = getValues();
 
     try {
-      // const formData = new FormData();
-      // formData.append('nome', data.nome);
-      // formData.append('preco', parseCurrencyBRL(data.preco).toString());
-      // formData.append('qt_estoque', String(data.qt_estoque));
-      // formData.append('marca', data.marca);
-      // formData.append('logo', data.image);
-
-      // const response = await axios.post(
-      //   'https://67ddc6fd471aaaa7428282c2.mockapi.io/api/v1/product',
-      //   formData,
-      //   {
-      //     headers: {
-      //       'Content-Type': 'multipart/form-data',
-      //     },
-      //   }
-      // );
-
       const response = await axios.post(
-        'https://67ddc6fd471aaaa7428282c2.mockapi.io/api/v1/product',
+        `${import.meta.env.VITE_API_BASE_URL}/product`,
         {
           nome: data.nome,
           preco: parseCurrencyBRL(data.preco).toString(),
@@ -193,13 +176,11 @@ export default function ProductForm({
 
       reset();
       setModalMessage('Produto cadastrado com sucesso!');
-      // setModalError(false);
       setModalType('success');
     } catch (error) {
       console.error('Erro ao enviar formulário:', error);
 
       setModalMessage('Erro ao cadastrar produto. Tente novamente.');
-      // setModalError(true);
       setModalType('error');
     }
     setIsSubmitting(false);
@@ -309,7 +290,9 @@ export default function ProductForm({
               })}
               onInput={(e) => {
                 const input = e.target as HTMLInputElement;
-                input.value = input.value.replace(/[^0-9]/g, '');
+                input.value = input.value
+                  .replace(/^0+/, '')
+                  .replace(/[^0-9]/g, '');
               }}
               error={!!errors.qt_estoque}
               size="small"
@@ -349,7 +332,9 @@ export default function ProductForm({
               })}
               onInput={(e) => {
                 const input = e.target as HTMLInputElement;
-                input.value = input.value.replace(/[^0-9]/g, '');
+                input.value = input.value
+                  .replace(/^0+/, '')
+                  .replace(/[^0-9]/g, '');
               }}
               error={!!errors.qt_vendas}
               size="small"
