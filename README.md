@@ -1,8 +1,15 @@
 ## Installation
 
-```bash
-$ npm install
+1. Install dependencies
 
+```bash
+npm install
+```
+
+2. Clone .env.example to .env and set up the required variables.
+
+```bash
+cp .env.example .env
 ```
 
 ## Running the app
