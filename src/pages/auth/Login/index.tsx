@@ -82,17 +82,22 @@ export default function Login(props: { disableCustomTheme?: boolean }) {
       );
 
       if (users.length === 0) {
-        setLoginError('Usuário não encontrado.');
+        setLoginError('Credenciais inválidas.');
         return;
       }
 
       const user = users[0];
 
-      if (user.password !== password) {
-        setLoginError('Senha incorreta.');
+      if (user.senha !== password) {
+        setLoginError('Credenciais inválidas.');
         return;
       }
-      dispatch(login({ user: user.firstName, token: user.token }));
+      dispatch(
+        login({
+          user: { name: user.nome, email: user.email, image: user.image },
+          token: user.token,
+        })
+      );
       navigate('/products');
     } catch (err) {
       setLoginError('Erro ao fazer login. Tente novamente.');

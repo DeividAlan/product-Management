@@ -49,6 +49,7 @@ export default function RegisterForm() {
   const [openModal, setOpenModal] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
   const [modalError, setModalError] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
@@ -58,44 +59,45 @@ export default function RegisterForm() {
     formState: { errors },
     control,
     setValue,
+    reset,
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
   });
 
   const onSubmit: SubmitHandler<FormData> = async (data) => {
+    setLoading(true);
     try {
-      const response = await fetch(
+      const response = await axios.post(
         'https://67ddc6fd471aaaa7428282c2.mockapi.io/api/v1/user',
         {
-          method: 'POST',
+          nome: data.firstName,
+          sobrenome: data.lastName,
+          cpf: data.cpf,
+          sexo: data.sexo,
+          dt_nascimento: data.birthDate,
+          cep: data.zip,
+          cidade: data.city,
+          estado: data.state,
+          logradouro: data.address,
+          bairro: data.neighborhood,
+          complemento: data.complement,
+          email: data.email,
+          senha: data.password,
+        },
+        {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            nome: data.firstName,
-            sobrenome: data.lastName,
-            cpf: data.cpf,
-            sexo: data.sexo,
-            dt_nascimento: data.birthDate,
-            cep: data.zip,
-            cidade: data.city,
-            estado: data.state,
-            logradouro: data.address,
-            bairro: data.neighborhood,
-            complemento: data.complement,
-            email: data.email,
-            senha: data.password,
-          }),
         }
       );
 
-      if (!response.ok) {
+      console.log(response);
+
+      if (!response.data.id) {
         throw new Error('Erro ao salvar usuário');
       }
 
-      const result = await response.json();
-      console.log('Usuário salvo com sucesso:', result);
-
+      reset();
       setModalMessage('Usuário cadastrado com sucesso!');
       setModalError(false);
       setOpenModal(true);
@@ -106,6 +108,7 @@ export default function RegisterForm() {
       setModalError(true);
       setOpenModal(true);
     }
+    setLoading(false);
   };
 
   const formatCep = (cep: string) => {
@@ -137,6 +140,7 @@ export default function RegisterForm() {
           setValue('city', data.localidade);
           setValue('state', data.uf);
           setValue('address', data.logradouro);
+          setValue('neighborhood', data.bairro);
           setErrorMessage(null);
         }
       } catch (error: unknown) {
@@ -414,6 +418,7 @@ export default function RegisterForm() {
             variant="contained"
             type="submit"
             sx={{ width: { xs: '100%', sm: 'fit-content' } }}
+            disabled={loading}
           >
             Cadastrar
           </Button>
@@ -436,18 +441,16 @@ export default function RegisterForm() {
             borderRadius: 2,
           }}
         >
+          {modalError ? (
+            <ErrorIcon sx={{ fontSize: 50, mb: 2, color: 'error.main' }} />
+          ) : (
+            <CheckCircle sx={{ fontSize: 50, mb: 2, color: 'success.main' }} />
+          )}
           <Typography variant="h6" color={modalError ? 'error' : 'success'}>
-            {modalError ? (
-              <ErrorIcon sx={{ fontSize: 50, mb: 2, color: 'error.main' }} />
-            ) : (
-              <CheckCircle
-                sx={{ fontSize: 50, mb: 2, color: 'success.main' }}
-              />
-            )}
             {modalMessage}
           </Typography>
-          <Button onClick={handleModalClose} sx={{ mt: 2 }} variant="contained">
-            Fechar
+          <Button onClick={handleModalClose} sx={{ mt: 6 }} variant="contained">
+            OK
           </Button>
         </Box>
       </Modal>
