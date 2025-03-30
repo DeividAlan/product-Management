@@ -423,7 +423,6 @@ export default function RegisterForm() {
         </Box>
       </form>
 
-      {/* Modal */}
       <Modal open={openModal} onClose={handleModalClose}>
         <Box
           sx={{
